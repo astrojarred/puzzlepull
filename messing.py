@@ -59,14 +59,12 @@ def get_layout(width, height, data):
         number = clue["number"]
         blank_puzzle[y][x] = number
         if clue["direction"] == "down":
-            for index, row in enumerate(range(y + 1, y + length - 1)):
+            for index, row in enumerate(range(y + 1, y + length)):
                 if blank_puzzle[row][x] == "#":
                     blank_puzzle[row][x] = 0
 
     return blank_puzzle
 
-
-get_layout(15, 15, data)
 
 # get the clues from the entry
 def get_clues(data):
@@ -106,6 +104,7 @@ def get_guardian_puzzle(URL, filepath=None):
     puzzle["kind"] = ["http://ipuz.org/crossword"]
     puzzle["copyright"] = f"{dt.year} Guardian News & Media Limited"
     puzzle["author"] = data["creator"]["name"]
+
     puzzle["publisher"] = "The Guardian"
     puzzle["url"] = URL
     puzzle["title"] = data["name"]
@@ -128,11 +127,3 @@ def get_guardian_puzzle(URL, filepath=None):
         json.dump(puzzle, outfile)
 
     return puzzle
-
-
-puzzle = get_guardian_puzzle(
-    URL="https://www.theguardian.com/crosswords/quiptic/1100",
-    filepath="/Users/jarredgreen/Documents/crosswords/puzzlepull",
-)
-
-puzzle
