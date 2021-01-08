@@ -66,6 +66,8 @@ def get_layout(width, height, data):
     return blank_puzzle
 
 
+get_layout(15, 15, data)
+
 # get the clues from the entry
 def get_clues(data):
 
@@ -93,6 +95,11 @@ def get_guardian_puzzle(URL, filepath=None):
     js_crossword = soup.find("div", class_="js-crossword")
     data = json.loads(js_crossword.get_attribute_list("data-crossword-data")[0])
 
+    # get the datetime
+    dt = datetime.datetime.fromtimestamp(data["date"] / 1000)
+    width = data["dimensions"]["cols"]
+    height = data["dimensions"]["rows"]
+
     puzzle = dict()
     puzzle["origin"] = f"The Guardian"
     puzzle["version"] = "http://ipuz.org/v2"
@@ -102,16 +109,13 @@ def get_guardian_puzzle(URL, filepath=None):
     puzzle["publisher"] = "The Guardian"
     puzzle["url"] = URL
     puzzle["title"] = data["name"]
-    dt = datetime.datetime.fromtimestamp(data["date"] / 1000)
     puzzle["date"] = dt.strftime("%m/%d/%Y")
     puzzle["annotation"] = f"Puzzle type: {data['crosswordType']}"
-    puzzle["dimensions"] = dict(
-        width=data["dimensions"]["cols"], height=data["dimensions"]["rows"]
-    )
+    puzzle["dimensions"] = dict(width=width, height=height)
 
-    puzzle["puzzle"] = get_layout(15, 15, data)
+    puzzle["puzzle"] = get_layout(width, height, data)
     puzzle["clues"] = get_clues(data)
-    puzzle["solution"] = get_solution(15, 15, data)
+    puzzle["solution"] = get_solution(width, height, data)
 
     output = ipuz.write(puzzle)
 
@@ -120,5 +124,15 @@ def get_guardian_puzzle(URL, filepath=None):
     if not filepath:
         filepath = "."
 
-    with open(f"{filepath}/filename", "w") as outfile:
-        json.dump(output)
+    with open(f"{filepath}/{filename}", "w") as outfile:
+        json.dump(puzzle, outfile)
+
+    return puzzle
+
+
+puzzle = get_guardian_puzzle(
+    URL="https://www.theguardian.com/crosswords/quiptic/1100",
+    filepath="/Users/jarredgreen/Documents/crosswords/puzzlepull",
+)
+
+puzzle
