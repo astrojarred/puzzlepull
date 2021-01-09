@@ -1,6 +1,7 @@
 import json
-import requests
 import datetime
+import requests
+
 from bs4 import BeautifulSoup
 
 from flask import Flask, request, jsonify, Response
@@ -16,7 +17,7 @@ def home():
 
 
 @app.route("/guardian")
-def get_guardian_puzzle():
+def guardian_puzzle():
     """Scrape a puzzle from the Guardian website and
     convert to .ipuz (JSON) format."""
 
@@ -33,8 +34,10 @@ def get_guardian_puzzle():
     if download:
         return Response(
             json.dumps(puzzle),
-            mimetype='application/json',
-            headers={"Content-Disposition":f"attachment;filename={puzzle['annotation']}"}
+            mimetype="application/json",
+            headers={
+                "Content-Disposition": f"attachment;filename={puzzle['annotation']}"
+            },
         )
     else:
         return jsonify(puzzle), 200
@@ -142,7 +145,7 @@ def get_guardian_puzzle(URL, filepath=None, download=True):
     try:
         puzzle["author"] = data["creator"]["name"]
     except KeyError:
-        pass # no author!
+        pass  # no author!
 
     puzzle["publisher"] = "The Guardian"
     puzzle["url"] = URL
