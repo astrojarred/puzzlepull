@@ -1,8 +1,43 @@
-import ipuz
 import json
 import requests
 import datetime
 from bs4 import BeautifulSoup
+
+from flask import Flask, request, jsonify, Response
+
+app = Flask(__name__)
+
+
+@app.route("/")
+def home():
+    """Display homepage"""
+
+    return "Hello world!", 200
+
+
+@app.route("/guardian")
+def get_guardian_puzzle():
+    """Scrape a puzzle from the Guardian website and
+    convert to .ipuz (JSON) format."""
+
+    url = request.args.get("puzzle_url")
+    download = request.args.get("download")
+    if not download or download.lower() == "false":
+        download = False
+    else:
+        download = True
+    print(f"The URL provided is: {url}")
+
+    puzzle = get_guardian_puzzle(url, download=False)
+
+    if download:
+        return Response(
+            json.dumps(puzzle),
+            mimetype='application/json',
+            headers={"Content-Disposition":f"attachment;filename={puzzle['annotation']}"}
+        )
+    else:
+        return jsonify(puzzle), 200
 
 
 # make a blank puzzle
@@ -103,7 +138,11 @@ def get_guardian_puzzle(URL, filepath=None, download=True):
     puzzle["version"] = "http://ipuz.org/v2"
     puzzle["kind"] = ["http://ipuz.org/crossword"]
     puzzle["copyright"] = f"{dt.year} Guardian News & Media Limited"
-    puzzle["author"] = data["creator"]["name"]
+
+    try:
+        puzzle["author"] = data["creator"]["name"]
+    except KeyError:
+        pass # no author!
 
     puzzle["publisher"] = "The Guardian"
     puzzle["url"] = URL
