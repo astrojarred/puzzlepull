@@ -84,7 +84,7 @@ def get_clues(data):
     return clues
 
 
-def get_guardian_puzzle(URL, filepath=None):
+def get_guardian_puzzle(URL, filepath=None, download=True):
 
     page = requests.get(URL)
 
@@ -99,7 +99,7 @@ def get_guardian_puzzle(URL, filepath=None):
     height = data["dimensions"]["rows"]
 
     puzzle = dict()
-    puzzle["origin"] = f"The Guardian"
+    puzzle["origin"] = "The Guardian"
     puzzle["version"] = "http://ipuz.org/v2"
     puzzle["kind"] = ["http://ipuz.org/crossword"]
     puzzle["copyright"] = f"{dt.year} Guardian News & Media Limited"
@@ -109,21 +109,21 @@ def get_guardian_puzzle(URL, filepath=None):
     puzzle["url"] = URL
     puzzle["title"] = data["name"]
     puzzle["date"] = dt.strftime("%m/%d/%Y")
-    puzzle["annotation"] = f"Puzzle type: {data['crosswordType']}"
+    # puzzle["annotation"] = f"Puzzle type: {data['crosswordType']}"
     puzzle["dimensions"] = dict(width=width, height=height)
 
     puzzle["puzzle"] = get_layout(width, height, data)
     puzzle["clues"] = get_clues(data)
     puzzle["solution"] = get_solution(width, height, data)
 
-    output = ipuz.write(puzzle)
-
     filename = f"Guardian_{data['crosswordType']}_{data['number']}.ipuz"
+    puzzle["annotation"] = filename
 
     if not filepath:
         filepath = "."
 
-    with open(f"{filepath}/{filename}", "w") as outfile:
-        json.dump(puzzle, outfile)
+    if download:
+        with open(f"{filepath}/{filename}", "w") as outfile:
+            json.dump(puzzle, outfile)
 
     return puzzle
