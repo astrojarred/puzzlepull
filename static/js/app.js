@@ -12,4 +12,4 @@ function handleDownloadClick() {
 }
 
 // Attach an event to listen for the search recipes button
-d3. select("#search-btn").on("click", handleClickSearch);
+d3.select("#search-btn").on("click", handleDownloadClick);
