@@ -11,7 +11,7 @@ function handleDownloadClick() {
     var downloadURL = baseURL + query;
 
     // Simulate an HTTP redirect:
-    window.location.replace(downloadURL);
+    window.location.href = downloadURL;
 
   };
 }
