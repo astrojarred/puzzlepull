@@ -7,7 +7,7 @@ function handleDownloadClick() {
     document.getElementById("search_query").placeholder=query;
 
     // base url
-    var baseURL = "https://th6n0jtotb.execute-api.eu-south-1.amazonaws.com/dev/guardian?puzzle_url=";
+    var baseURL = "https://th6n0jtotb.execute-api.eu-south-1.amazonaws.com/dev/guardian?download=True&puzzle_url=";
     var downloadURL = baseURL + query;
 
     // Simulate an HTTP redirect:
