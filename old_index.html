@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Puzzlepull App</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.11.0/d3.js"></script>
+</head>
+
+<style>
+.active-cyan-4 input[type=text]:focus:not([readonly]) {
+  border: 1px solid #4dd0e1;
+  box-shadow: 0 0 0 1px #4dd0e1;
+}
+.active-cyan-3 input[type=text] {
+  border: 1px solid #4dd0e1;
+  box-shadow: 0 0 0 1px #4dd0e1;
+}
+</style>
+
+<body>
+  <div class="container-fluid">
+    <div class="jumbotron text-center">
+      <h1>puzzlepull</h1>
+      <p>Download Guardian puzzles in ipuz format!</p>
+        <div class="active-cyan-3 active-cyan-4 mb-4">
+            <input class="form-control" id='search_query' type="text"
+                   placeholder="Paste the full link to a guardian puzzle here" aria-label="full_url">
+            <p></p>
+            <button class="btn btn-primary btn-lg" id="search-btn" type="button" >Download!</button>
+            <p></p>
+            <p id="search_num"></p>
+        </div>
+    </div>
+  </div>
+
+ <script src="static/js/app.js"></script>
+
+
+ </body>
+
+</html>
