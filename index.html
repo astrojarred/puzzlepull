@@ -28,13 +28,40 @@
       type="text/javascript"
       src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/3.0.0/mdb.min.js"
     ></script>
+    <!-- custom css -->
+    <link rel="stylesheet" type="text/css" href="assets/css/style.css">
+    <!-- click actions -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.11.0/d3.js"></script>
 
   </head>
 
-  <body>
+  <body style="background-color: #ffffff">
 
-    <h1>Hello, world!</h1>
-    <h2>Welcome to puzzlepull</h2>
+    <header>
+      <!-- Jumbotron -->
+      <div class="p-5 text-center page-header">
+
+        <div class="text">
+          <p class="h1">Puzzlepull</p>
+          <p class="fs-5">Download crosswords in an ipuz format</p>
+        </div>
+
+        <p>&nbsp;</p>
+
+        <div class="active-purple-3 active-purple-4 mb-4">
+          <input class="form-control" type="text" id="puzzle-url"
+                 placeholder="Paste link here" aria-label="full_url">
+        </div>
+
+        <div class="active-purple-3 active-purple-4 mb-4">
+          <button type="button" class="btn btn-default btn-lg"
+                  id="download-btn">Download ipuz</button>
+        </div>
+
+      </div>
+      <!-- Jumbotron -->
+    </header>
+
 
     <script src="static/js/app.js"></script>
 
