@@ -33,12 +33,18 @@
 
     <main id="content" class="main-content" role="main">
 
-      <input class="form-control" id='search_query' type="text"
-             placeholder="Paste the full link to a guardian puzzle here" aria-label="full_url">
-      <p></p>
-      <button class="btn btn-primary btn-lg" id="search-btn" type="button" >Download!</button>
-      <p></p>
-      <p id="search_num"></p>
+      <div class="container-fluid">
+        <div class="jumbotron text-center">
+            <div class="active-cyan-3 active-cyan-4 mb-4">
+                <input class="form-control" id='search_query' type="text"
+                       placeholder="Paste the full link to a guardian puzzle here" aria-label="full_url">
+                <p></p>
+                <button class="btn btn-primary btn-lg" id="search-btn" type="button" >Download!</button>
+                <p></p>
+                <p id="search_num"></p>
+            </div>
+        </div>
+      </div>
 
       {{ content }}
 
@@ -52,6 +58,6 @@
       </footer>
     </main>
 
-  <script src="static/js/app.js"></script>
+   <script src="static/js/app.js"></script>
   </body>
 </html>
