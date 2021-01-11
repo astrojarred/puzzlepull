@@ -4,7 +4,7 @@ function handleDownloadClick() {
 
   if (query) {
     console.log(query)
-    document.getElementById("search_query").placeholder=query;
+    document.getElementById("puzzle-url").placeholder=query;
 
     // base url
     var baseURL = "https://th6n0jtotb.execute-api.eu-south-1.amazonaws.com/dev/guardian?download=True&puzzle_url=";
