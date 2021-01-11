@@ -1,6 +1,6 @@
 // function to handle when clicking the Download button
 function handleDownloadClick() {
-  const query = d3.select('#search_query').property("value");
+  const query = d3.select('#puzzle-url').property("value");
 
   if (query) {
     console.log(query)
@@ -17,4 +17,4 @@ function handleDownloadClick() {
 }
 
 // Attach an event to listen for the search recipes button
-d3.select("#search-btn").on("click", handleDownloadClick);
+d3.select("#download-btn").on("click", handleDownloadClick);
