@@ -1,0 +1,8 @@
+/*!
+ * Custom CSS for puzzlepull
+ */
+
+.page-header {
+  background-image: linear-gradient(to right, rgba(117, 184, 255, 0.5), rgba(186, 141, 231, 0.5));
+  height: 350px
+}

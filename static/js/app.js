@@ -1,10 +1,10 @@
 // function to handle when clicking the Download button
 function handleDownloadClick() {
-  const query = d3.select('#search_query').property("value");
+  const query = d3.select('#puzzle_url').property("value");
 
   if (query) {
     console.log(query)
-    document.getElementById("search_query").placeholder=query;
+    document.getElementById("puzzle_url").placeholder=query;
 
     // base url
     var baseURL = "https://th6n0jtotb.execute-api.eu-south-1.amazonaws.com/dev/guardian?download=True&puzzle_url=";
@@ -17,4 +17,4 @@ function handleDownloadClick() {
 }
 
 // Attach an event to listen for the search recipes button
-d3.select("#search-btn").on("click", handleDownloadClick);
+d3.select("#download-btn").on("click", handleDownloadClick);

@@ -1,45 +1,77 @@
 <!DOCTYPE html>
 <html lang="en">
 
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <title>Puzzlepull App</title>
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.11.0/d3.js"></script>
-</head>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Puzzlepull</title>
 
-<style>
-.active-cyan-4 input[type=text]:focus:not([readonly]) {
-  border: 1px solid #4dd0e1;
-  box-shadow: 0 0 0 1px #4dd0e1;
-}
-.active-cyan-3 input[type=text] {
-  border: 1px solid #4dd0e1;
-  box-shadow: 0 0 0 1px #4dd0e1;
-}
-</style>
+    <!-- Material Design Bootstrap css -->
+    <!-- Font Awesome -->
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css"
+      rel="stylesheet"
+    />
+    <!-- Google Fonts -->
+    <link
+      href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap"
+      rel="stylesheet"
+    />
+    <!-- MDB -->
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/3.0.0/mdb.min.css"
+      rel="stylesheet"
+    />
+    <!-- MDB js -->
+    <script
+      type="text/javascript"
+      src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/3.0.0/mdb.min.js"
+    ></script>
+    <!-- custom css -->
+    <link rel="stylesheet" type="text/css" href="assets/css/style.css">
+    <!-- click actions -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.11.0/d3.js"></script>
 
-<body>
-  <div class="container-fluid">
-    <div class="jumbotron text-center">
-      <h1>puzzlepull</h1>
-      <p>Download Guardian puzzles in ipuz format!</p>
-        <div class="active-cyan-3 active-cyan-4 mb-4">
-            <input class="form-control" id='search_query' type="text"
-                   placeholder="Paste the full link to a guardian puzzle here" aria-label="full_url">
-            <p></p>
-            <button class="btn btn-primary btn-lg" id="search-btn" type="button" >Download!</button>
-            <p></p>
-            <p id="search_num"></p>
+  </head>
+
+  <body style="background-color: #ffffff">
+
+    <header>
+      <!-- Jumbotron -->
+      <div class="p-5 text-center page-header">
+
+        <div class="text">
+          <p class="h1">Puzzlepull</p>
+          <p class="fs-5">Download crosswords in ipuz format</p>
         </div>
+
+        <p>&nbsp;</p>
+
+        <input class="form-control" type="text" id="puzzle_url"
+               placeholder="Paste link here" aria-label="full_url">
+
+        <p></p>
+
+        <button type="button" class="btn btn-default btn-lg"
+                id="download-btn">Download ipuz</button>
+
+      </div>
+      <!-- Jumbotron -->
+    </header>
+
+
+    <script src="static/js/app.js"></script>
+
+    <div class="p-3">
+      This code scrapes and converts crossword puzzles online in HTML format to a .ipuz format.
+      This allows the puzzles to be uploaded and solved on sites like <a href="https://squares.io/">squares.io</a>.
     </div>
-  </div>
 
- <script src="static/js/app.js"></script>
+    <div class="p-3">
+      Maintained on the <a href="https://github.com/astrojarred/puzzlepull">puzzlepull repository</a> on GitHub.
+    </div>
 
-
- </body>
+  </body>
 
 </html>
