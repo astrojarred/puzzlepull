@@ -62,7 +62,9 @@ def get_solution(width, height, data):
         x = clue["position"]["x"]
         y = clue["position"]["y"]
         length = clue["length"]
-        solution = clue["solution"]
+        solution = clue.get("solution")
+        if not solution:
+            return
         if clue["direction"] == "across":
             blank_puzzle[y][x : x + length] = list(solution)
         elif clue["direction"] == "down":
@@ -82,7 +84,7 @@ def get_layout(width, height, data):
         x = clue["position"]["x"]
         y = clue["position"]["y"]
         length = clue["length"]
-        solution = clue["solution"]
+        solution = clue.get("solution")
         number = clue["number"]
         blank_puzzle[y][x] = number
         if clue["direction"] == "across":
@@ -93,7 +95,7 @@ def get_layout(width, height, data):
         x = clue["position"]["x"]
         y = clue["position"]["y"]
         length = clue["length"]
-        solution = clue["solution"]
+        solution = clue.get("solution")
         number = clue["number"]
         blank_puzzle[y][x] = number
         if clue["direction"] == "down":
