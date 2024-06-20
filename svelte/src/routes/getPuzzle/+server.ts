@@ -1,8 +1,11 @@
+import { API_URL } from './../../../.svelte-kit/ambient.d';
 import { env } from '$env/dynamic/private';
 import { json } from '@sveltejs/kit';
 
-if (!env?.API_URL) {
-	throw new Error('API_URL is not defined');
+let API_URL = env?.API_URL;
+if (!API_URL) {
+	API_URL = "http://localhost:8000";
+	console.log("WARNING: API_URL not found in environment variables, using default value: http://localhost:8000")
 }
 
 /** @type {import('./$types').RequestHandler} */
