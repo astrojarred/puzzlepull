@@ -14,7 +14,7 @@ services:
 
   frontend:
     build: 
-      context: ./svelte
+      context: ./frontend
     container_name: frontend
     ports:
       - "4000:4000"
