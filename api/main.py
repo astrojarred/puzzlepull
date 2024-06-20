@@ -1,48 +1,41 @@
-import json
 import datetime
+import json
+
 import requests
-
 from bs4 import BeautifulSoup
+from fastapi import FastAPI
+from fastapi.responses import Response
 
-from flask import Flask, request, jsonify, Response
-
-app = Flask(__name__)
-
-
-@app.route("/")
-def home():
-    """Display homepage"""
-
-    return "Hello world!", 200
+app = FastAPI()
 
 
-@app.route("/guardian")
-def guardian_puzzle():
+@app.get("/")
+async def root():
+    return {"message": "Hello World"}
+
+
+@app.get("/guardian")
+def guardian_puzzle(url: str, download: bool = False):
     """Scrape a puzzle from the Guardian website and
     convert to .ipuz (JSON) format."""
 
-    url = request.args.get("puzzle_url")
-    download = request.args.get("download")
-    if not download or download.lower() == "false":
-        download = False
-    else:
-        download = True
     print(f"The URL provided is: {url}")
 
     puzzle = get_guardian_puzzle(url, download=False)
 
     if download:
         return Response(
-            json.dumps(puzzle),
-            mimetype="application/json",
+            content=json.dumps(puzzle),
+            media_type="application/json",
             headers={
                 "Content-Disposition": f"attachment;filename={puzzle['annotation']}"
             },
         )
     else:
-        return jsonify(puzzle), 200
+        return puzzle
 
 
+# helper functions
 # make a blank puzzle
 def make_blank_puzzle(width, height):
     puzzle = []
@@ -54,7 +47,6 @@ def make_blank_puzzle(width, height):
 
 # get the solution from the entries
 def get_solution(width, height, data):
-
     blank_puzzle = make_blank_puzzle(15, 15)
 
     # fill in across answers to solution
@@ -84,7 +76,6 @@ def get_layout(width, height, data):
         x = clue["position"]["x"]
         y = clue["position"]["y"]
         length = clue["length"]
-        solution = clue.get("solution")
         number = clue["number"]
         blank_puzzle[y][x] = number
         if clue["direction"] == "across":
@@ -95,7 +86,6 @@ def get_layout(width, height, data):
         x = clue["position"]["x"]
         y = clue["position"]["y"]
         length = clue["length"]
-        solution = clue.get("solution")
         number = clue["number"]
         blank_puzzle[y][x] = number
         if clue["direction"] == "down":
@@ -108,13 +98,11 @@ def get_layout(width, height, data):
 
 # get the clues from the entry
 def get_clues(data):
-
     clues = dict()
     clues["Across"] = []
     clues["Down"] = []
 
     for clue in data["entries"]:
-
         number = clue["number"]
         text = clue["clue"]
         direction = clue["direction"]
@@ -125,7 +113,6 @@ def get_clues(data):
 
 
 def get_guardian_puzzle(URL, filepath=None, download=True):
-
     page = requests.get(URL)
 
     soup = BeautifulSoup(page.content, "html.parser")
@@ -158,7 +145,10 @@ def get_guardian_puzzle(URL, filepath=None, download=True):
 
     puzzle["puzzle"] = get_layout(width, height, data)
     puzzle["clues"] = get_clues(data)
-    puzzle["solution"] = get_solution(width, height, data)
+    solution = get_solution(width, height, data)
+
+    if solution:
+        puzzle["solution"] = solution
 
     filename = f"Guardian_{data['crosswordType']}_{data['number']}.ipuz"
     puzzle["annotation"] = filename
