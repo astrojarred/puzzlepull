@@ -1,4 +1,3 @@
-import { API_URL } from './../../../.svelte-kit/ambient.d';
 import { env } from '$env/dynamic/private';
 import { json } from '@sveltejs/kit';
 
