@@ -9,7 +9,7 @@ services:
       - "8000:8000"
     environment:
       - FASTAPI_PORT=8000
-      - API_URL=http://backend:8000
+      - API_URL=http://localhost:8000
     command: fastapi run main.py --port 8000
 
   frontend:
@@ -19,6 +19,6 @@ services:
     ports:
       - "4000:4000"
     environment:
-      - API_URL=http://backend:8000
+      - API_URL=http://localhost:8000
       - PORT=4000
     command: ["node", "build"]
