@@ -16,6 +16,6 @@ services:
     ports:
       - "4000:4000"
     environment:
-      - API_URL=${API_URL}
-      - PORT=4000
+      API_URL: ${API_URL}
+      PORT: 4000
     command: node build
