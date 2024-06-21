@@ -7,9 +7,6 @@ services:
       - "8022"
     ports:
       - "8022:8022"
-    environment:
-      - FASTAPI_PORT=8022
-      - API_URL=http://0.0.0.0:8022
     command: fastapi run main.py --port 8022
 
   frontend:
@@ -19,6 +16,6 @@ services:
     ports:
       - "4000:4000"
     environment:
-      - API_URL=http://0.0.0.0:8022
+      - API_URL=${API_URL}
       - PORT=4000
     command: node build
