@@ -1,0 +1,6 @@
+{
+	"validHostnames": {
+		"localhost": "localhost",
+		"www.theguardian.com": "The Guardian"
+	}
+}
