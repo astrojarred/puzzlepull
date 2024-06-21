@@ -16,6 +16,7 @@ if (!API_URL || building) {
 export async function POST({ request }) {
 	// download puzzle from API
 	const { url } = await request.json();
+	console.log("Fetching puzzle from", `${API_URL}/guardian?url=${url}?download=true`);
 	const response = await fetch(`${API_URL}/guardian?url=${url}?download=true`);
 	const data = await response.json();
 	return json(data);
