@@ -12,6 +12,4 @@ COPY --from=requirements-stage /tmp/requirements.txt /api/requirements.txt
 RUN pip install --no-cache-dir --upgrade -r /api/requirements.txt
 COPY . /api
 # set environment variables
-ENV FASTAPI_PORT=8000
-ENV API_URL=http://localhost:8000
-CMD ["fastapi", "run", "main.py", "--port", "8000"]
+CMD ["fastapi", "run", "main.py"]
