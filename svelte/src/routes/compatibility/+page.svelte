@@ -92,24 +92,20 @@
 
 <Card.Root>
 	<Card.Header>
-		<Card.Title>Download any puzzle into a .puz file format</Card.Title>
-		<Card.Description>Simply paste the URL below</Card.Description>
+		<Card.Title>Compatibility List</Card.Title>
+		<Card.Description>
+			If the site you want is not listed, open an issue on GitHub!
+		</Card.Description>
 	</Card.Header>
 	<Card.Content>
-		<Alert.Root class="mb-4">
-			<Alert.Title>
-				<p>{urlMessage}</p>
-			</Alert.Title>
-		</Alert.Root>
-		<form>
-			<Input
-				placeholder="Puzzle URL"
-				bind:value={puzzleURL}
-				class={urlValid || puzzleURL === '' ? 'bg-white' : 'bg-destructive bg-opacity-20'}
-			/>
-		</form>
+		<ul>
+			<li>- The Guardian</li>
+		</ul>
 	</Card.Content>
-	<Card.Footer class="flex flex-col items-start border-t px-6 py-4">
-		<Button disabled={!urlValid} on:click={downloadPuzzle}>Download</Button>
+	<Card.Footer class="border-t px-6 py-4">
+		<Button
+			on:click={() => (window.location.href = 'https://github.com/astrojarred/puzzlepull/issues')}
+			>Request</Button
+		>
 	</Card.Footer>
 </Card.Root>
