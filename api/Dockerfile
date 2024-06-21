@@ -12,4 +12,4 @@ COPY --from=requirements-stage /tmp/requirements.txt /api/requirements.txt
 RUN pip install --no-cache-dir --upgrade -r /api/requirements.txt
 COPY . /api
 # set environment variables
-CMD ["fastapi", "run", "main.py"]
+CMD ["fastapi", "run", "main.py", "--port", "8022"]
