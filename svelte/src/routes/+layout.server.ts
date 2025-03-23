@@ -1,15 +1,18 @@
 import { REDIS_URL } from '$env/static/private';
-// grab the counter from the api
 import { createClient } from 'redis';
 
-const client = createClient({
-    url: REDIS_URL
-});
-
-client.connect();
-
-const counter = await client.get('puzzlepull_counter');
-
 export const load = async () => {
-    return { counter };
+    const client = createClient({
+        url: REDIS_URL
+    });
+
+    try {
+        await client.connect();
+        const counter = await client.get('puzzlepull_counter');
+        await client.quit(); // Clean up the connection
+        return { counter };
+    } catch (error) {
+        console.error('Redis connection error:', error);
+        return { counter: '0' }; // Provide a fallback value
+    }
 }
