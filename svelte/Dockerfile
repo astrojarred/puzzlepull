@@ -2,7 +2,7 @@
 FROM node:22-slim AS build-frontend
 WORKDIR /frontend
 COPY . /frontend
-RUN npm install -g pnpm@9.4.0
+RUN npm install -g pnpm@10.6.5
 RUN pnpm install
 RUN pnpm run build
 EXPOSE 8000
