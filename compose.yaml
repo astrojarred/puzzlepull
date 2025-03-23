@@ -16,7 +16,7 @@ services:
     ports:
       - "4000:4000"
     environment:
-      REDIS_URL: ${REDIS_URL:-redis://localhost:6379}
+      REDIS_URL: ${REDIS_URL}
       API_URL: ${API_URL}
       PORT: 4000
     command: node build

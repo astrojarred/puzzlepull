@@ -4,7 +4,7 @@ WORKDIR /frontend
 COPY . /frontend
 RUN npm install -g pnpm@10.6.5
 RUN pnpm install
-ARG REDIS_URL=redis://localhost:6379
+ARG REDIS_URL
 ENV REDIS_URL=${REDIS_URL}
 RUN pnpm run build
 EXPOSE 8000
