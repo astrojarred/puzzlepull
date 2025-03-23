@@ -2,8 +2,9 @@
 FROM python:3.11-slim as requirements-stage
 WORKDIR /tmp
 RUN pip install poetry
+RUN poetry self add poetry-plugin-export
 COPY ./pyproject.toml ./poetry.lock* /tmp/
-RUN poetry export -f requirements.txt --output requirements.txt --without-hashes
+RUN poetry export --output requirements.txt --without-hashes
 
 # Stage 2: Serve the FastAPI backend
 FROM python:3.11-slim
