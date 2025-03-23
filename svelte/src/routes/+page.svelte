@@ -99,7 +99,7 @@
 
 <Card.Root>
 	<Card.Header>
-		<Card.Title>Download any puzzle into a .puz file format</Card.Title>
+		<Card.Title>Download any puzzle into a .ipuz file format</Card.Title>
 		<Card.Description>Simply paste the URL below • {downloadCount} puzzles downloaded so far</Card.Description>
 	</Card.Header>
 	<Card.Content>
