@@ -74,7 +74,7 @@
 			const url = URL.createObjectURL(data);
 			const a = document.createElement('a');
 			a.href = url;
-			a.download = jsonInfo?.annotation ? `${jsonInfo.annotation}.puz` : 'puzzle.puz';
+			a.download = jsonInfo?.annotation ? `${jsonInfo.annotation}` : 'puzzle.ipuz';
 			document.body.appendChild(a);
 			a.click();
 			URL.revokeObjectURL(url);

@@ -1,10 +1,14 @@
 <script lang="ts">
+	import type { LayoutProps } from './$types';
+
 	import { Button } from '$lib/components/ui/button/index.js';
 	import * as Card from '$lib/components/ui/card/index.js';
 	import { Input } from '$lib/components/ui/input/index.js';
 	import * as Alert from '$lib/components/ui/alert/index.js';
 
 	import { validHostnames } from '$lib/validHostnames.json';
+
+	let { data, children }: LayoutProps = $props();
 
 	const hostnameList = Object.keys(validHostnames);
 
@@ -68,22 +72,25 @@
 
 		if (response.ok) {
 			const clonedResponse = response.clone();
-			const data = await response.blob();
+			const downloadData = await response.blob();
 			const jsonInfo = await clonedResponse.json();
 			// download the puzzle as a file
-			const url = URL.createObjectURL(data);
+			const url = URL.createObjectURL(downloadData);
 			const a = document.createElement('a');
 			a.href = url;
-			a.download = jsonInfo?.annotation ? `${jsonInfo.annotation}.puz` : 'puzzle.puz';
+			a.download = jsonInfo?.annotation ? `${jsonInfo.annotation}` : 'puzzle.ipuz';
 			document.body.appendChild(a);
 			a.click();
 			URL.revokeObjectURL(url);
+			// increment the counter
+			downloadCount++;
 		} else {
 			console.error(response);
 		}
 	};
 
 	let puzzleURL = $state('');
+	let downloadCount = $state(data.counter || 0); // Track number of downloads
 	let urlInfo = $derived(validateURL(puzzleURL));
 	let urlSite = $derived(urlInfo?.hostname);
 	let urlValid = $derived(urlInfo?.valid);
@@ -93,7 +100,7 @@
 <Card.Root>
 	<Card.Header>
 		<Card.Title>Download any puzzle into a .puz file format</Card.Title>
-		<Card.Description>Simply paste the URL below</Card.Description>
+		<Card.Description>Simply paste the URL below • {downloadCount} puzzles downloaded so far</Card.Description>
 	</Card.Header>
 	<Card.Content>
 		<Alert.Root class="mb-4">

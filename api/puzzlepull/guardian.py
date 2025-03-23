@@ -5,7 +5,7 @@ import requests
 from bs4 import BeautifulSoup
 
 from .helper import make_blank_puzzle
-
+from .db import increment_counter as increment
 
 # get the solution from the entries
 def get_solution(data: dict, width: int = 15, height: int = 15) -> list[list[str]]:
@@ -74,7 +74,7 @@ def get_clues(data: dict) -> dict:
     return clues
 
 
-def get_guardian_puzzle(URL: str, filepath: str = None, download: bool = True) -> dict:
+def get_guardian_puzzle(URL: str, filepath: str = None, download: bool = True, increment_counter: bool = True) -> dict:
     page = requests.get(URL)
 
     soup = BeautifulSoup(page.content, "html.parser")
@@ -124,5 +124,9 @@ def get_guardian_puzzle(URL: str, filepath: str = None, download: bool = True) -
     if download:
         with open(f"{filepath}/{filename}", "w") as outfile:
             json.dump(puzzle, outfile)
+
+    if increment_counter:
+        new_count = increment()
+        print(f"Puzzle pulled: {new_count}")
 
     return puzzle
