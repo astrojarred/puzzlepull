@@ -2,7 +2,7 @@
 	import '../app.css';
 
 	import { goto } from '$app/navigation';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 
 	import HardDriveDownload from 'lucide-svelte/icons/hard-drive-download';
 	import Share from 'lucide-svelte/icons/share';
@@ -13,7 +13,6 @@
 	import * as Tooltip from '$lib/components/ui/tooltip/index.js';
 	import { GithubIcon } from 'lucide-svelte';
 
-	console.log('PAGE', $page.route.id);
 </script>
 
 <div class="grid h-screen w-full pl-[53px]">
@@ -29,7 +28,7 @@
 					<Button
 						variant="ghost"
 						size="icon"
-						class={$page.route.id === '/' ? 'bg-muted rounded-lg' : 'rounded-lg'}
+						class={page.route.id === '/' ? 'bg-muted rounded-lg' : 'rounded-lg'}
 						aria-label="PuzzlePull"
 						builders={[builder]}
 						on:click={() => goto('/')}
@@ -46,7 +45,7 @@
 					<Button
 						variant="ghost"
 						size="icon"
-						class={$page.route.id === '/compatibility' ? 'bg-muted rounded-lg' : 'rounded-lg'}
+						class={page.route.id === '/compatibility' ? 'bg-muted rounded-lg' : 'rounded-lg'}
 						aria-label="Compatibility"
 						builders={[builder]}
 						on:click={() => goto('/compatibility')}
