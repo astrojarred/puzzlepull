@@ -7,6 +7,7 @@
 	import * as Alert from '$lib/components/ui/alert/index.js';
 
 	import { validHostnames } from '$lib/validHostnames.json';
+	import LoaderCircle from "lucide-svelte/icons/loader-circle";
 
 	let { data, children }: LayoutProps = $props();
 
@@ -128,8 +129,14 @@
 		</form>
 	</Card.Content>
 	<Card.Footer class="flex flex-col items-start border-t px-6 py-4">
-		<Button disabled={!urlValid || loading} on:click={downloadPuzzle} className={loading ? 'animate-pulse' : ''}>
-			{loading ? 'Downloading...' : 'Download'}
+		<Button disabled={!urlValid || loading} onclick={downloadPuzzle}>
+			{#if loading}
+				<LoaderCircle class="mr-2 h-4 w-4 animate-spin" />
+				Downloading...
+			{:else}
+				Download
+			{/if}
 		</Button>
+
 	</Card.Footer>
 </Card.Root>
