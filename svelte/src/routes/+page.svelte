@@ -93,7 +93,9 @@
 			a.click();
 			URL.revokeObjectURL(url);
 			// increment the counter
-			downloadCount++;
+			const counterResponse = await fetch('/counter');
+			const counterData = await counterResponse.json();
+			downloadCount = counterData.counter;
 		} else {
 			console.error(response);
 		}
