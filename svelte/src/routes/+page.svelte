@@ -7,13 +7,22 @@
 	import * as Alert from '$lib/components/ui/alert/index.js';
 
 	import { validHostnames } from '$lib/validHostnames.json';
+	import LoaderCircle from "lucide-svelte/icons/loader-circle";
 
 	let { data, children }: LayoutProps = $props();
 
+
 	const hostnameList = Object.keys(validHostnames);
 
+	// validation response type
+	type ValidationResponse = {
+		valid: boolean;
+		hostname: string;
+		message: string;
+	};
+
 	// validate the URL
-	let validateURL = (puzzleURL: string) => {
+	let validateURL = (puzzleURL: string): ValidationResponse => {
 		// catch empty string
 		if (puzzleURL === '') {
 			return {
@@ -32,7 +41,7 @@
 				return {
 					valid: true,
 					hostname: hostname,
-					message: `Site: ${validHostnames[hostname]}`
+					message: `Site: ${validHostnames[hostname as keyof typeof validHostnames]}`
 				};
 			} else {
 				return {
@@ -60,6 +69,7 @@
 	};
 
 	let downloadPuzzle = async () => {
+		loading = true;
 		console.log('Downloading puzzle', puzzleURL);
 		// fetch the puzzle
 		const response = await fetch('/getPuzzle', {
@@ -67,7 +77,7 @@
 			headers: {
 				'Content-Type': 'application/json'
 			},
-			body: JSON.stringify({ url: puzzleURL })
+			body: JSON.stringify({ url: puzzleURL, urlSite: urlSite })
 		});
 
 		if (response.ok) {
@@ -87,6 +97,7 @@
 		} else {
 			console.error(response);
 		}
+		loading = false;
 	};
 
 	let puzzleURL = $state('');
@@ -95,6 +106,7 @@
 	let urlSite = $derived(urlInfo?.hostname);
 	let urlValid = $derived(urlInfo?.valid);
 	let urlMessage = $derived(urlInfo?.message);
+	let loading = $state(false);
 </script>
 
 <Card.Root>
@@ -106,6 +118,11 @@
 		<Alert.Root class="mb-4">
 			<Alert.Title>
 				<p>{urlMessage}</p>
+				{#if urlSite === "observer.co.uk"}
+					<p class="text-sm mt-1 text-muted-foreground">
+						🚧 Note: Only the Everyman and Speedy puzzles are currently supported.
+					</p>
+				{/if}
 			</Alert.Title>
 		</Alert.Root>
 		<form>
@@ -117,6 +134,14 @@
 		</form>
 	</Card.Content>
 	<Card.Footer class="flex flex-col items-start border-t px-6 py-4">
-		<Button disabled={!urlValid} on:click={downloadPuzzle}>Download</Button>
+		<Button disabled={!urlValid || loading} onclick={downloadPuzzle}>
+			{#if loading}
+				<LoaderCircle class="mr-2 h-4 w-4 animate-spin" />
+				Downloading...
+			{:else}
+				Download
+			{/if}
+		</Button>
+
 	</Card.Footer>
 </Card.Root>

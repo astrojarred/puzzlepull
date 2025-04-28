@@ -74,7 +74,7 @@ def get_clues(data: dict) -> dict:
     return clues
 
 
-def get_guardian_puzzle(URL: str, filepath: str = None, download: bool = True, increment_counter: bool = True) -> dict:
+def get_guardian_puzzle(URL: str, filepath: str = None, download: bool = False, increment_counter: bool = False) -> dict:
     page = requests.get(URL)
 
     soup = BeautifulSoup(page.content, "html.parser")

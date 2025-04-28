@@ -12,5 +12,9 @@ WORKDIR /api
 COPY --from=requirements-stage /tmp/requirements.txt /api/requirements.txt
 RUN pip install --no-cache-dir --upgrade -r /api/requirements.txt
 COPY . /api
+
+# Install playwright
+RUN playwright install chromium-headless-shell
+
 # set environment variables
 CMD ["fastapi", "run", "main.py", "--port", "8022"]
