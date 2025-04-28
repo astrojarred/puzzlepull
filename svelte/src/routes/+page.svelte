@@ -118,6 +118,11 @@
 		<Alert.Root class="mb-4">
 			<Alert.Title>
 				<p>{urlMessage}</p>
+				{#if urlSite === "observer.co.uk"}
+					<p class="text-sm mt-1 text-muted-foreground">
+						🚧 Note: Only the Everyman and Speedy puzzles are currently supported.
+					</p>
+				{/if}
 			</Alert.Title>
 		</Alert.Root>
 		<form>
