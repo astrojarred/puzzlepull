@@ -21,6 +21,6 @@ export async function GET({ request, fetch }) {
         return Response.json({ counter: data.counter });
     } catch (error) {
         console.error('Error fetching counter:', error);
-        return Response.json({ counter: '0' });
+        return Response.json({ counter: 0 });
     }
 }
