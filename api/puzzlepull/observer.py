@@ -256,7 +256,7 @@ def get_title(soup: BeautifulSoup) -> str:
     return title
 
 
-def get_oberserver_puzzle(
+def get_observer_puzzle(
     soup: BeautifulSoup,
     url: str,
     filepath: str = None,
@@ -305,7 +305,7 @@ def get_observer_puzzle_sync(url: str = "https://observer.co.uk/everyman") -> di
     xword_url = generate_xword_url(url)
     html = get_rendered_puzzle_html_sync(xword_url)
     soup = BeautifulSoup(html, "html.parser")
-    return get_oberserver_puzzle(soup, url)
+    return get_observer_puzzle(soup, url)
 
 
 async def get_observer_puzzle_async(
@@ -314,4 +314,4 @@ async def get_observer_puzzle_async(
     xword_url = generate_xword_url(url)
     html = await get_rendered_puzzle_html_async(xword_url)
     soup = BeautifulSoup(html, "html.parser")
-    return get_oberserver_puzzle(soup, url)
+    return get_observer_puzzle(soup, url)
