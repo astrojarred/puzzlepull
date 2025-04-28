@@ -31,8 +31,8 @@ export async function POST({ request }) {
 	}
 
 	const endpoint = ENDPOINT_MAP[urlSite as keyof typeof ENDPOINT_MAP];
-	console.log("Fetching puzzle from", `${API_URL}/${endpoint}?url=${url}?download=true`);
-	const response = await fetch(`${API_URL}/${endpoint}?url=${url}?download=true`);
+	console.log("Fetching puzzle from", `${API_URL}/${endpoint}?url=${url}&download=true`);
+	const response = await fetch(`${API_URL}/${endpoint}?url=${url}&download=true`);
 	const data = await response.json();
 	return json(data);
 }
