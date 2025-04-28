@@ -1,19 +1,14 @@
-import { REDIS_URL } from '$env/static/private';
-import { createClient } from 'redis';
+import { building } from '$app/environment';
+import { env } from '$env/dynamic/private';
 
-export const load = async () => {
-    const client = createClient({
-        url: REDIS_URL
-    });
-
+/** @type {import('./$types').LayoutLoad} */
+export const load = async ({ fetch }) => {
     try {
-        await client.connect();
-        const counter = await client.get('puzzlepull_counter');
-        await client.quit(); // Clean up the connection
-        console.log("COUNTER", counter);
-        return { counter };
+        const response = await fetch('/counter');
+        const data = await response.json();
+        return { counter: data.counter };
     } catch (error) {
-        console.error('Redis connection error:', error);
-        return { counter: '0' }; // Provide a fallback value
+        console.error('Error fetching counter:', error);
+        return { counter: '0' };
     }
 }

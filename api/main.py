@@ -28,7 +28,7 @@ def guardian_puzzle(url: str, download: bool = False):
 
     print(f"Current counter: {get_counter()}")
 
-    puzzle = get_guardian_puzzle(url, download=download)
+    puzzle = get_guardian_puzzle(url)
 
     increment_counter()
 
