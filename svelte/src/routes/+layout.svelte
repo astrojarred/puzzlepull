@@ -15,6 +15,10 @@
 
 </script>
 
+<svelte:head>
+	<title>PuzzlePull</title>
+</svelte:head>
+
 <div class="grid h-screen w-full pl-[53px]">
 	<aside class="inset-y fixed left-0 z-20 flex h-full flex-col border-r">
 		<div class="border-b p-2">
