@@ -1,6 +1,6 @@
+import { building } from '$app/environment';
 import { env } from '$env/dynamic/private';
 import { json } from '@sveltejs/kit';
-import { building } from '$app/environment';
 
 let API_URL = env?.API_URL;
 if (!API_URL || building) {
@@ -12,12 +12,27 @@ if (!API_URL || building) {
 	}
 }
 
+const ENDPOINT_MAP = {
+	"www.theguardian.com": "guardian",
+	"observer.co.uk": "observer"
+}
+
 /** @type {import('./$types').RequestHandler} */
 export async function POST({ request }) {
 	// download puzzle from API
-	const { url } = await request.json();
-	console.log("Fetching puzzle from", `${API_URL}/guardian?url=${url}?download=true`);
-	const response = await fetch(`${API_URL}/guardian?url=${url}?download=true`);
+	const { url, urlSite } = await request.json();
+
+	if (!urlSite) {
+		throw new Error("urlSite not found in request");
+	}
+
+	if (!ENDPOINT_MAP[urlSite as keyof typeof ENDPOINT_MAP]) {
+		throw new Error(`${urlSite} not implemented.`);
+	}
+
+	const endpoint = ENDPOINT_MAP[urlSite as keyof typeof ENDPOINT_MAP];
+	console.log("Fetching puzzle from", `${API_URL}/${endpoint}?url=${url}?download=true`);
+	const response = await fetch(`${API_URL}/${endpoint}?url=${url}?download=true`);
 	const data = await response.json();
 	return json(data);
 }

@@ -100,6 +100,7 @@
 	<Card.Content>
 		<ul>
 			<li>- The Guardian</li>
+			<li>- The Observer (Everyman & Speedy only)</li>
 		</ul>
 	</Card.Content>
 	<Card.Footer class="border-t px-6 py-4">
