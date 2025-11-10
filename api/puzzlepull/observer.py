@@ -2,7 +2,7 @@ import asyncio
 import datetime
 import json
 import requests
-from urllib.parse import quote
+from urllib.parse import quote, urlparse, parse_qs
 
 from bs4 import BeautifulSoup
 
@@ -19,16 +19,41 @@ def generate_xword_url(
 
     soup = BeautifulSoup(page.content, "html.parser")
 
-    # find div with class pm-embed-div
-    div = soup.find("div", class_="pm-embed-div")
+    data_id = None
+    data_set = None
 
-    # get the data-id attribute
-    data_id = div.get("data-id")
-
-    # data-set is the set name
-    data_set = div.get("data-set")
-
-    xword_url = f"https://cdn2.amuselabs.com/puzzleme/crossword?&set={data_set}&embed=js&id={data_id}&uid={uid}&src={quote(url, safe='')}"
+    # First, try to find iframe with amuselabs URL (new structure)
+    iframe = soup.find("iframe", src=lambda x: x and "amuselabs.com" in x)
+    
+    if iframe:
+        iframe_src = iframe.get("src")
+        if iframe_src:
+            # Parse the iframe src URL to extract id and set parameters
+            parsed_url = urlparse(iframe_src)
+            query_params = parse_qs(parsed_url.query)
+            
+            # Extract id and set from query parameters
+            if "id" in query_params:
+                data_id = query_params["id"][0]
+            if "set" in query_params:
+                data_set = query_params["set"][0]
+    
+    # Fallback: try to find div with class pm-embed-div (old structure or dynamically loaded)
+    if not data_id or not data_set:
+        div = soup.find("div", class_="pm-embed-div")
+        if div:
+            data_id = div.get("data-id")
+            data_set = div.get("data-set")
+    
+    # Error handling if neither method found the required data
+    if not data_id or not data_set:
+        raise ValueError(
+            f"Could not find puzzle data (id and set) in the page. "
+            f"Tried both iframe src and pm-embed-div. URL: {url}"
+        )
+    
+    # Construct URL using new format (pmm instead of puzzleme)
+    xword_url = f"https://cdn2.amuselabs.com/pmm/crossword?id={data_id}&set={data_set}&embed=js&uid={uid}&src={quote(url, safe='')}"
     return xword_url
 
 
