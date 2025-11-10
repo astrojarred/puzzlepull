@@ -5,8 +5,6 @@ services:
     container_name: backend
     expose:
       - "8022"
-    ports:
-      - "8022:8022"
     command: fastapi run main.py --port 8022
 
   frontend:
@@ -16,8 +14,8 @@ services:
         - REDIS_URL=${REDIS_URL}
         - API_URL=${API_URL}
     container_name: frontend
-    ports:
-      - "4000:4000"
+    expose:
+      - "4000"
     environment:
       - REDIS_URL=${REDIS_URL}
       - API_URL=${API_URL}
