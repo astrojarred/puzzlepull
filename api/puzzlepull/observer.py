@@ -303,7 +303,7 @@ def get_observer_puzzle(
     puzzle["author"] = "Everyman Crossword"
     puzzle["publisher"] = "The Observer"
     puzzle["url"] = url
-    puzzle["title"] = title
+    puzzle["title"] = title.replace("_", " ")
     puzzle["date"] = dt.strftime("%m/%d/%Y")
     puzzle["dimensions"] = dict(width=len(grid[0]), height=len(grid))
     puzzle["puzzle"] = grid
