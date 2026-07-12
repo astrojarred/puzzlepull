@@ -140,7 +140,7 @@ def parse_crossword_clues(soup: BeautifulSoup, is_across: bool) -> list:
             clue_number_element.get_text(strip=True) if clue_number_element else None
         )
         clue_text = (
-            clue_text_element.get_text(strip=True) if clue_text_element else None
+            clue_text_element.get_text(" ", strip=True) if clue_text_element else None
         )
         word_lens_raw = (
             word_lens_element.get_text(strip=True) if word_lens_element else None
