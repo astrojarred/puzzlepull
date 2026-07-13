@@ -226,3 +226,92 @@ Frontend wiring for each: `validHostnames.json`, `ENDPOINT_MAP` in `getPuzzle/+s
 ## Appendix — already covered Guardian cryptics
 
 Guardian support is type-agnostic via `crosswordType` in embedded data. Free Guardian series typically include Cryptic, Quiptic, Quick, Prize, Weekend, Speedy, Everyman (Everyman/Speedy also on Observer). No separate cryptic provider work is needed for Guardian itself.
+
+---
+
+## Evaluation: should puzzlepull use `xword-dl` on the backend?
+
+**Short answer:** Yes as a **thin download adapter**, not as a drop-in that magically “supports everything they do.” It is the fastest path to breadth, but you still need an ipuz conversion layer, a free-source allowlist, and awareness of `.puz` fidelity loss.
+
+### What `xword-dl` actually gives you
+
+| Fact | Detail |
+|------|--------|
+| Language / license | Python 3.10+, **MIT** — fine for puzzlepull |
+| Library API | Public: `xword_dl.by_url(url)` and `xword_dl.by_keyword(cmd)` → `(puz.Puzzle, filename)` |
+| Output | **`.puz` in memory** (`puzpy.Puzzle`), not ipuz |
+| URL paste fit | `by_url` matches outlet URLs **or** scans page for embeds (AmuseLabs, Compiler, etc.) — aligns with puzzlepull UX |
+| Keyword/date mode | `by_keyword("usa")` / `-d` — useful later, not required for current UI |
+| AmuseLabs | Maintains `rawc` **deobfuscation** (no Playwright) — better than puzzlepull’s current Observer path |
+| Overlap today | Already has Guardian + Observer downloaders |
+| Deps | `requests`, `bs4`, `lxml`, `puzpy`, `xmltodict`, `dateparser`, … — light; **no Playwright** |
+| Maintenance | Active (latest release 2025-10); scrapers break often and get patched upstream |
+
+### Proposed integration shape
+
+```text
+user URL
+  → (optional hostname allowlist)
+  → xword_dl.by_url(url, preserve_html=True)
+  → puz.Puzzle
+  → puz_to_ipuz(...)          # small glue (hand-rolled or via pypuz)
+  → existing FastAPI Response (.ipuz download)
+```
+
+That could collapse per-site FastAPI routes into one `/pull?url=…` (or keep thin wrappers). Frontend `ENDPOINT_MAP` becomes less necessary if the backend auto-detects via `by_url`.
+
+### Why this is attractive
+
+1. **Breadth for free:** LAT, Atlantic, Vox, USA Today, Simply Daily (incl. cryptic), WaPo Sunday, New Yorker, Crosshare-adjacent embeds, Universal, etc. — without rewriting each scraper.
+2. **AmuseLabs done right:** deobfuscated `rawc` → structured JSON is more reliable than Playwright DOM scraping, and would let you **drop Playwright/Chromium** from the API image if Observer moves to `xword-dl`.
+3. **Real import surface:** not “shell out to CLI”; `by_url` is meant to be called as a library.
+4. **Upstream absorbs churn:** when AmuseLabs/Guardian HTML changes, pin/bump `xword-dl` instead of owning every fix.
+
+### Why “support all of the things they do” is the wrong target
+
+| Issue | Impact on puzzlepull |
+|-------|----------------------|
+| **NYT / auth outlets** | Need stored credentials; wrong for a public converter service |
+| **Paywalled / contested sources** | “We can download it” ≠ “we should expose it” |
+| **Open SSRF-ish proxy** | Unrestricted `by_url` fetches arbitrary pages; keep an **allowlist** (or blocklist + private-IP guards) |
+| **Product mismatch** | Their UX is CLI keyword/date; yours is paste-a-URL → ipuz for squares.io |
+| **Pinning / breakage** | `xword-dl` pins exact dependency versions; Poetry may need careful resolution; scraper breakages become deploy-time bumps |
+
+### The hard part: `.puz` → `.ipuz`
+
+puzzlepull’s contract is **ipuz v2 JSON**. `xword-dl` always funnels through `puz.Puzzle` and runs `sanitize_for_puzfile()` (HTML→text / unicode cleanup aimed at Across Lite).
+
+Consequences:
+
+- **Lossy vs native Guardian scrape:** curly quotes, some Unicode, and clue HTML can be flattened. Mitigate with `preserve_html=True`, but `.puz` is still a poorer intermediate than Guardian’s source JSON.
+- **You must own conversion:** either
+  - small hand mapper (`width`/`height`/`solution`/`fill`/`clues` → ipuz grid + Across/Down), or
+  - [pypuz](https://github.com/crosswordnexus/pypuz) (`fromPuz` → `toIPuz`) — note pypuz documents **ipuz v1**; validate against squares.io before relying on it.
+- **Clue shape:** `.puz` stores a flat numbered clue list; ipuz wants `{"Across": [[n, text], …], "Down": …}`. Conversion must renumber from the grid (standard, but easy to get wrong for rebus/circles).
+
+So adopting `xword-dl` does **not** eliminate format work; it eliminates **source** work.
+
+### Operational caveats
+
+- **Import side effect:** importing `xword_dl.util` creates `~/.config/xword-dl/xword-dl.yaml`. Harmless in most containers; messy on read-only filesystems — set `XDG_CONFIG_HOME` to a writable path or vendor a tiny patch.
+- **Sync HTTP in FastAPI:** same as today’s Guardian/Observer routes; fine behind a worker, but AmuseLabs/USA Today fetches can be slow — consider timeouts and a threadpool.
+- **Replacing Observer:** if you switch Observer to `xword-dl`, delete Playwright from the Docker image (big win). Keep a regression test that Everyman/Speedy still convert.
+- **Keeping native Guardian:** reasonable if you care about max clue fidelity; otherwise one code path is simpler.
+
+### Verdict / recommendation
+
+| Approach | When to choose |
+|----------|----------------|
+| **A. Adopt `xword-dl` + `puz→ipuz` glue** (recommended default) | Want many free outlets quickly; OK with slight clue sanitization; want to drop Playwright |
+| **B. Vendor only AmuseLabs deobfuscator / selected downloaders** | Want control; minimize dependency surface; still write ipuz yourself |
+| **C. Continue hand scrapers only** | Prefer perfect Guardian/Observer fidelity; accept slow source growth |
+
+**Recommended path for puzzlepull:** **A**, scoped:
+
+1. Add `xword-dl` dependency; implement `puz_to_ipuz` with golden tests (Guardian + one AmuseLabs + Simply Daily cryptic).
+2. Expose a single backend entry that calls `by_url(..., preserve_html=True)`.
+3. **Allowlist free hostnames** (start with research Tier 1); do not enable NYT auth.
+4. Migrate Observer off Playwright once AmuseLabs via `xword-dl` passes tests.
+5. Optionally keep the existing Guardian module until ipuz output matches closely enough.
+
+That gets “most of what `xword-dl` supports among free URL-paste sources,” not a blanket mirror of the entire CLI — which is the right product boundary.
