@@ -11,6 +11,17 @@ The backend primarily uses [`xword-dl`](https://github.com/thisisparker/xword-dl
 
 Native scrapers for **The Guardian** and **The Observer** remain as fallbacks when `xword-dl` cannot fetch those sites.
 
+### Backend development
+
+The API lives in `api/` and is managed with [`uv`](https://docs.astral.sh/uv/) on **Python 3.13+**:
+
+```bash
+cd api
+uv sync
+uv run playwright install chromium-headless-shell
+uv run fastapi run main.py --port 8022
+```
+
 ### Compatible Sites
 
 Paste a puzzle URL from one of these publishers (and related AmuseLabs embed hosts):

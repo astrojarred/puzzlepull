@@ -1,23 +1,25 @@
-[tool.poetry]
+[project]
 name = "puzzlepull"
 version = "0.1.0"
-description = ""
-authors = ["Jarred Green <astrojarred@gmail.com>"]
+description = "Convert online crossword puzzles to .ipuz"
+authors = [
+    { name = "Jarred Green", email = "astrojarred@gmail.com" },
+]
+requires-python = ">=3.13"
+dependencies = [
+    "beautifulsoup4>=4.13.4",
+    "fastapi[standard]>=0.116.1",
+    "playwright>=1.52.0",
+    "redis>=6.2.0",
+    "requests>=2.32.4",
+    "xword-dl>=2025.10.14",
+]
 
-[tool.poetry.dependencies]
-python = "^3.11"
-beautifulsoup4 = "^4.12.3"
-requests = "^2.32.3"
-fastapi = "^0.111.0"
-redis = "^5.2.1"
-pytest-playwright = "^0.7.0"
-xword-dl = "^2025.10.14"
+[dependency-groups]
+dev = [
+    "ipykernel>=6.29.5",
+    "ipython>=9.0.2",
+]
 
-
-[tool.poetry.group.dev.dependencies]
-ipykernel = "^6.29.5"
-ipython = "^9.0.2"
-
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+[tool.uv]
+package = false

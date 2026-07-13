@@ -1,18 +1,19 @@
-# Stage 1: Build the FastAPI backend
-FROM python:3.11-slim as requirements-stage
-WORKDIR /tmp
-RUN pip install poetry
-RUN poetry self add poetry-plugin-export
-COPY ./pyproject.toml ./poetry.lock* /tmp/
-RUN poetry export --output requirements.txt --without-hashes
+# syntax=docker/dockerfile:1
 
-# Stage 2: Serve the FastAPI backend
-FROM python:3.11-slim
+FROM python:3.13-slim-bookworm
+
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+
 WORKDIR /api
-COPY --from=requirements-stage /tmp/requirements.txt /api/requirements.txt
 
-# Install system dependencies required by Playwright
-RUN apt-get update && apt-get install -y \
+ENV UV_COMPILE_BYTECODE=1 \
+    UV_LINK_MODE=copy \
+    UV_NO_DEV=1 \
+    XDG_CONFIG_HOME=/tmp/xdg-config \
+    PATH="/api/.venv/bin:$PATH"
+
+# Playwright / Chromium system libraries (Observer AmuseLabs fallback)
+RUN apt-get update && apt-get install -y --no-install-recommends \
     libglib2.0-0 \
     libnss3 \
     libnspr4 \
@@ -33,12 +34,11 @@ RUN apt-get update && apt-get install -y \
     libatspi2.0-0 \
     && rm -rf /var/lib/apt/lists/*
 
-RUN pip install --no-cache-dir --upgrade -r /api/requirements.txt
+COPY pyproject.toml uv.lock ./
+RUN uv sync --frozen --no-install-project
+
 COPY . /api
+RUN uv sync --frozen --no-install-project \
+    && playwright install chromium-headless-shell
 
-# Install playwright
-RUN playwright install chromium-headless-shell
-
-# set environment variables
-ENV XDG_CONFIG_HOME=/tmp/xdg-config
 CMD ["fastapi", "run", "main.py", "--port", "8022"]
