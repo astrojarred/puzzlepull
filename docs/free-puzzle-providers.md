@@ -36,6 +36,8 @@ Harder / lower priority free cryptics: Independent (Arkadium), FT (PDF-only), Hi
 
 Avoid for free URL-paste UX: NYT, Telegraph, Times UK, WSJ (gated / anti-bot).
 
+**Using `xword-dl` on the backend?** Likely yes as a download adapter + `puz→ipuz` glue, with a free-source allowlist — see evaluation at the end of this doc. That path can cover most Tier 1 sources faster than hand scrapers, at the cost of going through the lossy `.puz` intermediate.
+
 ---
 
 ## Tier 1 — Strong free candidates
