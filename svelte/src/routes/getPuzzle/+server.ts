@@ -1,6 +1,6 @@
 import { building } from '$app/environment';
 import { env } from '$env/dynamic/private';
-import { json } from '@sveltejs/kit';
+import { json, error } from '@sveltejs/kit';
 
 let API_URL = env?.API_URL;
 if (!API_URL || building) {
@@ -12,27 +12,29 @@ if (!API_URL || building) {
 	}
 }
 
-const ENDPOINT_MAP = {
-	"www.theguardian.com": "guardian",
-	"observer.co.uk": "observer"
-}
-
 /** @type {import('./$types').RequestHandler} */
 export async function POST({ request }) {
-	// download puzzle from API
-	const { url, urlSite } = await request.json();
+	const { url } = await request.json();
 
-	if (!urlSite) {
-		throw new Error("urlSite not found in request");
+	if (!url) {
+		throw error(400, "url not found in request");
 	}
 
-	if (!ENDPOINT_MAP[urlSite as keyof typeof ENDPOINT_MAP]) {
-		throw new Error(`${urlSite} not implemented.`);
+	const endpoint = `${API_URL}/pull?url=${encodeURIComponent(url)}&download=true`;
+	console.log("Fetching puzzle from", endpoint);
+	const response = await fetch(endpoint);
+
+	if (!response.ok) {
+		let detail = `Upstream error ${response.status}`;
+		try {
+			const body = await response.json();
+			detail = body?.detail || detail;
+		} catch {
+			// ignore parse errors
+		}
+		throw error(response.status, detail);
 	}
 
-	const endpoint = ENDPOINT_MAP[urlSite as keyof typeof ENDPOINT_MAP];
-	console.log("Fetching puzzle from", `${API_URL}/${endpoint}?url=${url}&download=true`);
-	const response = await fetch(`${API_URL}/${endpoint}?url=${url}&download=true`);
 	const data = await response.json();
 	return json(data);
 }

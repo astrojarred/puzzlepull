@@ -11,6 +11,7 @@ requests = "^2.32.3"
 fastapi = "^0.111.0"
 redis = "^5.2.1"
 pytest-playwright = "^0.7.0"
+xword-dl = "^2025.10.14"
 
 
 [tool.poetry.group.dev.dependencies]

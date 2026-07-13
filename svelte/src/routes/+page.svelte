@@ -70,6 +70,7 @@
 
 	let downloadPuzzle = async () => {
 		loading = true;
+		errorMessage = '';
 		console.log('Downloading puzzle', puzzleURL);
 		// fetch the puzzle
 		const response = await fetch('/getPuzzle', {
@@ -77,15 +78,14 @@
 			headers: {
 				'Content-Type': 'application/json'
 			},
-			body: JSON.stringify({ url: puzzleURL, urlSite: urlSite })
+			body: JSON.stringify({ url: puzzleURL })
 		});
 
 		if (response.ok) {
-			const clonedResponse = response.clone();
-			const downloadData = await response.blob();
-			const jsonInfo = await clonedResponse.json();
+			const jsonInfo = await response.json();
 			// download the puzzle as a file
-			const url = URL.createObjectURL(downloadData);
+			const blob = new Blob([JSON.stringify(jsonInfo)], { type: 'application/json' });
+			const url = URL.createObjectURL(blob);
 			const a = document.createElement('a');
 			a.href = url;
 			a.download = jsonInfo?.annotation ? `${jsonInfo.annotation}` : 'puzzle.ipuz';
@@ -96,8 +96,15 @@
 			const counterResponse = await fetch('/counter');
 			const counterData = await counterResponse.json();
 			downloadCount = counterData.counter;
+			errorMessage = '';
 		} else {
 			console.error(response);
+			try {
+				const errBody = await response.json();
+				errorMessage = errBody?.message || `Download failed (${response.status})`;
+			} catch {
+				errorMessage = `Download failed (${response.status})`;
+			}
 		}
 		loading = false;
 	};
@@ -109,6 +116,7 @@
 	let urlValid = $derived(urlInfo?.valid);
 	let urlMessage = $derived(urlInfo?.message);
 	let loading = $state(false);
+	let errorMessage = $state('');
 </script>
 
 <Card.Root>
@@ -120,10 +128,13 @@
 		<Alert.Root class="mb-4">
 			<Alert.Title>
 				<p>{urlMessage}</p>
-				{#if urlSite === "observer.co.uk"}
+				{#if urlSite === "observer.co.uk" || urlSite === "www.observer.co.uk"}
 					<p class="text-sm mt-1 text-muted-foreground">
-						🚧 Note: Only the Everyman and Speedy puzzles are currently supported.
+						Note: Only the Everyman and Speedy puzzles are currently supported.
 					</p>
+				{/if}
+				{#if errorMessage}
+					<p class="text-sm mt-1 text-destructive">{errorMessage}</p>
 				{/if}
 			</Alert.Title>
 		</Alert.Root>

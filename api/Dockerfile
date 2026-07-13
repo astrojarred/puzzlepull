@@ -40,4 +40,5 @@ COPY . /api
 RUN playwright install chromium-headless-shell
 
 # set environment variables
+ENV XDG_CONFIG_HOME=/tmp/xdg-config
 CMD ["fastapi", "run", "main.py", "--port", "8022"]
