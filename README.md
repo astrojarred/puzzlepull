@@ -24,26 +24,35 @@ uv run fastapi run main.py --port 8022
 
 ### Compatible Sites
 
-Paste a puzzle URL from one of these publishers (and related AmuseLabs embed hosts):
+puzzlepull aims to support every active free/`xword-dl` outlet that works with a pasted URL (or publisher landing page). Currently that includes:
 
-- The Guardian
+- The Guardian (Cryptic, Quiptic, Quick, Prize, Weekend, Speedy, Everyman)
 - The Observer (Everyman & Speedy)
 - USA Today
+- Universal
 - The Washington Post
-- The New Yorker
-- Los Angeles Times
+- The New Yorker (+ Mini)
+- Los Angeles Times (+ Mini)
 - The Atlantic
 - Vox
 - The Daily Beast
 - Newsday
 - The Walrus
 - Der Standard
-- Simply Daily Puzzles
 - Billboard
-- The Daily Princetonian
-- McKinsey
+- Crossword Club
+- Vulture
+- Simply Daily Puzzles (American, Cryptic, Quick)
+- Puzzmo (+ Big)
+- Daily Pop
+- The Globe and Mail
 - AmuseLabs CDN embeds
 
 Please open an issue if you would like to see a site added.
 
-Subscription-only sources (for example the NYT crossword) are not supported.
+Not supported (auth, paywall, or disabled upstream in `xword-dl`):
+
+- New York Times (including Mini / Variety)
+- Wall Street Journal
+- McKinsey
+- Puzzle Society / The Modern

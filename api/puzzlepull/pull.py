@@ -14,92 +14,46 @@ from xword_dl.util import XWordDLException
 from .guardian import get_guardian_puzzle
 from .observer import get_observer_puzzle_sync
 from .puz_to_ipuz import puz_to_ipuz
-
-# Free / publicly pasteable hosts we are willing to fetch for users.
-# Keep NYT and other auth-gated outlets off this list.
-ALLOWED_SUFFIXES = (
-    "theguardian.com",
-    "observer.co.uk",
-    "latimes.com",
-    "theatlantic.com",
-    "vox.com",
-    "thedailybeast.com",
-    "newsday.com",
-    "thewalrus.ca",
-    "derstandard.at",
-    "usatoday.com",
-    "simplydailypuzzles.com",
-    "washingtonpost.com",
-    "newyorker.com",
-    "billboard.com",
-    "dailyprincetonian.com",
-    "mckinsey.com",
-    "amuselabs.com",
-    "amuniversal.com",
+from .sources import (
+    BLOCKED_SUFFIXES,
+    KEYWORD_BY_SUFFIX,
+    ORIGIN_BY_SUFFIX,
 )
-
-ORIGIN_BY_SUFFIX = {
-    "theguardian.com": "The Guardian",
-    "observer.co.uk": "The Observer",
-    "latimes.com": "Los Angeles Times",
-    "theatlantic.com": "The Atlantic",
-    "vox.com": "Vox",
-    "thedailybeast.com": "The Daily Beast",
-    "newsday.com": "Newsday",
-    "thewalrus.ca": "The Walrus",
-    "derstandard.at": "Der Standard",
-    "usatoday.com": "USA Today",
-    "simplydailypuzzles.com": "Simply Daily Puzzles",
-    "washingtonpost.com": "The Washington Post",
-    "newyorker.com": "The New Yorker",
-    "billboard.com": "Billboard",
-    "dailyprincetonian.com": "The Daily Princetonian",
-    "mckinsey.com": "McKinsey",
-    "amuselabs.com": "AmuseLabs",
-    "amuniversal.com": "Universal",
-}
-
-# Outlets where xword-dl is keyword-oriented (or landing pages don't match_url).
-KEYWORD_BY_SUFFIX = {
-    "usatoday.com": "usa",
-    "washingtonpost.com": "wp",
-    "latimes.com": "lat",
-    "theatlantic.com": "atl",
-    "vox.com": "vox",
-    "thedailybeast.com": "db",
-    "newsday.com": "nd",
-    "thewalrus.ca": "wal",
-    "derstandard.at": "std",
-    "billboard.com": "bill",
-}
 
 
 def _hostname(url: str) -> str:
     return urlparse(url).hostname or ""
 
 
-def _allowed_suffix(hostname: str) -> str | None:
+def _suffix_match(hostname: str, suffixes: tuple[str, ...] | dict[str, str]) -> str | None:
     host = hostname.lower().removeprefix("www.")
-    for suffix in ALLOWED_SUFFIXES:
+    keys = suffixes.keys() if isinstance(suffixes, dict) else suffixes
+    for suffix in keys:
         if host == suffix or host.endswith("." + suffix):
             return suffix
     return None
 
 
+def is_blocked_url(url: str) -> bool:
+    return _suffix_match(_hostname(url), BLOCKED_SUFFIXES) is not None
+
+
 def is_allowed_url(url: str) -> bool:
-    return _allowed_suffix(_hostname(url)) is not None
+    if is_blocked_url(url):
+        return False
+    return _suffix_match(_hostname(url), ORIGIN_BY_SUFFIX) is not None
 
 
 def _origin_for_url(url: str) -> str:
-    suffix = _allowed_suffix(_hostname(url))
+    suffix = _suffix_match(_hostname(url), ORIGIN_BY_SUFFIX)
     if not suffix:
         return "puzzlepull"
-    return ORIGIN_BY_SUFFIX.get(suffix, suffix)
+    return ORIGIN_BY_SUFFIX[suffix]
 
 
 def _keyword_for_url(url: str) -> str | None:
     parsed = urlparse(url)
-    host = (parsed.hostname or "").lower().removeprefix("www.")
+    host = (parsed.hostname or "").lower()
     path = parsed.path.lower()
 
     if "simplydailypuzzles.com" in host:
@@ -110,20 +64,75 @@ def _keyword_for_url(url: str) -> str | None:
         return "sdp"
 
     if "newyorker.com" in host:
-        if "mini" in path:
+        # Section roots use keyword; dated article URLs rely on by_url.
+        if path.rstrip("/") == "/puzzles-and-games-dept/mini-crossword":
             return "tnym"
-        # Dated crossword article URLs are handled by by_url; landing pages use keyword.
         if path.rstrip("/") in {
             "/puzzles-and-games-dept/crossword",
-            "/puzzles-and-games-dept/mini-crossword",
             "",
         }:
             return "tny"
 
-    suffix = _allowed_suffix(host)
+    if "puzzmo.com" in host:
+        if "/crossword/big" in path or path.rstrip("/").endswith("/big"):
+            return "pzmb"
+        if path.rstrip("/") in {"", "/puzzle"} or "/crossword" not in path:
+            return "pzm"
+
+    if "latimes.com" in host and "mini" in path:
+        return "latm"
+
+    if "theguardian.com" in host:
+        # Series / section roots -> latest via keyword. Numbered puzzle URLs use by_url.
+        mapping = {
+            "/crosswords/cryptic": "grdc",
+            "/crosswords/series/cryptic": "grdc",
+            "/crosswords/everyman": "grde",
+            "/crosswords/series/everyman": "grde",
+            "/crosswords/speedy": "grds",
+            "/crosswords/series/speedy": "grds",
+            "/crosswords/quick": "grdq",
+            "/crosswords/series/quick": "grdq",
+            "/crosswords/prize": "grdp",
+            "/crosswords/series/prize": "grdp",
+            "/crosswords/weekend": "grdw",
+            "/crosswords/series/weekend": "grdw",
+            "/crosswords/quiptic": "grdu",
+            "/crosswords/series/quiptic": "grdu",
+        }
+        normalized = path.rstrip("/")
+        if normalized in mapping:
+            return mapping[normalized]
+        # /crosswords/cryptic/29800 has an extra segment -> by_url only.
+
+    if "observer.co.uk" in host:
+        if "/everyman" in path and "/article/" not in path:
+            return "ever"
+        if "/speedy" in path and "/article/" not in path:
+            return "spdy"
+
+    if "universaluclick.com" in host or "amuniversal.com" in host:
+        return "uni"
+
+    if "puzzlenation.com" in host:
+        return "pop"
+
+    if "vulture.com" in host:
+        return "vult"
+
+    if "crosswordclub.com" in host:
+        # Specific puzzle URLs work with by_url; index uses keyword.
+        if path.rstrip("/") in {"", "/puzzles"}:
+            return "club"
+
+    if "billboard.com" in host:
+        if path.rstrip("/") in {"", "/p", "/p/billboard-crossword"}:
+            return "bill"
+
+    suffix = _suffix_match(host, KEYWORD_BY_SUFFIX)
     if not suffix:
         return None
-    return KEYWORD_BY_SUFFIX.get(suffix)
+    return KEYWORD_BY_SUFFIX[suffix]
 
 
 def _native_fallback(url: str) -> dict | None:
@@ -152,8 +161,14 @@ def get_puzzle_from_url(url: str) -> dict:
     if not url:
         raise ValueError("URL is required")
 
+    host = _hostname(url) or url
+    if is_blocked_url(url):
+        raise PermissionError(
+            f"Host not supported (subscription/auth required or disabled): {host}"
+        )
+
     if not is_allowed_url(url):
-        raise PermissionError(f"Host not allowed: {_hostname(url) or url}")
+        raise PermissionError(f"Host not allowed: {host}")
 
     errors: list[str] = []
 
@@ -164,7 +179,7 @@ def get_puzzle_from_url(url: str) -> dict:
     except Exception as exc:
         errors.append(f"by_url: {exc}")
 
-    # 2) Landing pages / keyword-only outlets (USA Today, WaPo, etc.).
+    # 2) Landing pages / keyword-only outlets.
     keyword = _keyword_for_url(url)
     if keyword:
         try:

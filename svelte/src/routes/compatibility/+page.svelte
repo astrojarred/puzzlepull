@@ -12,7 +12,8 @@
 		<Card.Title>Compatibility List</Card.Title>
 		<Card.Description>
 			Supported via <a class="underline" href="https://github.com/thisisparker/xword-dl">xword-dl</a>
-			plus native Guardian/Observer fallbacks. If a site is missing, open an issue on GitHub.
+			plus native Guardian/Observer fallbacks. NYT and other subscription-only sources are not included.
+			If a site is missing, open an issue on GitHub.
 		</Card.Description>
 	</Card.Header>
 	<Card.Content>
@@ -22,8 +23,9 @@
 			{/each}
 		</ul>
 		<p class="text-sm text-muted-foreground mt-4">
-			Some AmuseLabs-backed outlets may fail when upstream scrapers break. NYT and other
-			subscription-only puzzles are intentionally not supported.
+			Paste a puzzle page URL when possible. For some outlets (USA Today, WaPo, Daily Pop, etc.),
+			the publisher homepage is enough and puzzlepull will fetch the latest puzzle.
+			AmuseLabs-backed sites can fail when upstream scrapers break.
 		</p>
 	</Card.Content>
 	<Card.Footer class="border-t px-6 py-4">
