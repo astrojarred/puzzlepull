@@ -1,90 +1,95 @@
 <script lang="ts">
-	import type { LayoutProps } from './$types';
-
-	import { Button } from '$lib/components/ui/button/index.js';
-	import * as Card from '$lib/components/ui/card/index.js';
-	import { Input } from '$lib/components/ui/input/index.js';
-	import * as Alert from '$lib/components/ui/alert/index.js';
-
+	import type { PageProps } from './$types';
+	import { untrack } from 'svelte';
 	import { validHostnames } from '$lib/validHostnames.json';
-	import LoaderCircle from "lucide-svelte/icons/loader-circle";
 
-	let { data, children }: LayoutProps = $props();
-
+	let { data }: PageProps = $props();
 
 	const hostnameList = Object.keys(validHostnames);
 
-	// validation response type
 	type ValidationResponse = {
 		valid: boolean;
 		hostname: string;
 		message: string;
 	};
 
-	// validate the URL
-	let validateURL = (puzzleURL: string): ValidationResponse => {
-		// catch empty string
+	const getURLsite = (puzzleURL: string) => {
+		try {
+			return new URL(puzzleURL).hostname;
+		} catch {
+			return '';
+		}
+	};
+
+	const validateURL = (puzzleURL: string): ValidationResponse => {
 		if (puzzleURL === '') {
 			return {
 				valid: false,
 				hostname: '',
-				message: 'Please enter a URL'
+				message: 'Paste a puzzle URL to get started'
 			};
 		}
 
 		try {
 			new URL(puzzleURL);
-
-			let hostname = getURLsite(puzzleURL);
+			const hostname = getURLsite(puzzleURL);
 
 			if (hostnameList.includes(hostname)) {
 				return {
 					valid: true,
-					hostname: hostname,
-					message: `Site: ${validHostnames[hostname as keyof typeof validHostnames]}`
-				};
-			} else {
-				return {
-					valid: false,
-					hostname: hostname,
-					message: 'Site not supported'
+					hostname,
+					message: `Ready · ${validHostnames[hostname as keyof typeof validHostnames]}`
 				};
 			}
-		} catch (e) {
+
+			return {
+				valid: false,
+				hostname,
+				message: 'Site not supported yet'
+			};
+		} catch {
 			return {
 				valid: false,
 				hostname: '',
-				message: 'Invalid URL'
+				message: 'That doesn’t look like a valid URL'
 			};
 		}
 	};
 
-	let getURLsite = (puzzleURL: string) => {
-		try {
-			let url = new URL(puzzleURL);
-			return url.hostname;
-		} catch (e) {
-			return '';
-		}
-	};
+	let puzzleURL = $state('');
+	// Seed once from layout load; later updates come from /counter after download
+	let downloadCount = $state(untrack(() => Number(data.counter) || 0));
+	let loading = $state(false);
+	let errorMessage = $state('');
 
-	let downloadPuzzle = async () => {
+	let urlInfo = $derived(validateURL(puzzleURL));
+	let urlSite = $derived(urlInfo.hostname);
+	let urlValid = $derived(urlInfo.valid);
+	let urlMessage = $derived(urlInfo.message);
+
+	const downloadPuzzle = async () => {
+		if (!urlValid || loading) return;
+
 		loading = true;
-		console.log('Downloading puzzle', puzzleURL);
-		// fetch the puzzle
-		const response = await fetch('/getPuzzle', {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json'
-			},
-			body: JSON.stringify({ url: puzzleURL, urlSite: urlSite })
-		});
+		errorMessage = '';
 
-		if (response.ok) {
+		try {
+			const response = await fetch('/getPuzzle', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({ url: puzzleURL, urlSite })
+			});
+
+			if (!response.ok) {
+				errorMessage = 'Download failed. Check the URL and try again.';
+				return;
+			}
+
 			const clonedResponse = response.clone();
 			const downloadData = await response.blob();
 			const jsonInfo = await clonedResponse.json();
-			// download the puzzle as a file
 			const url = URL.createObjectURL(downloadData);
 			const a = document.createElement('a');
 			a.href = url;
@@ -92,58 +97,89 @@
 			document.body.appendChild(a);
 			a.click();
 			URL.revokeObjectURL(url);
-			// increment the counter
+			a.remove();
+
 			const counterResponse = await fetch('/counter');
-			const counterData = await counterResponse.json();
-			downloadCount = counterData.counter;
-		} else {
-			console.error(response);
+			if (counterResponse.ok) {
+				const counterData = await counterResponse.json();
+				downloadCount = counterData.counter;
+			}
+		} catch {
+			errorMessage = 'Something went wrong. Please try again.';
+		} finally {
+			loading = false;
 		}
-		loading = false;
 	};
 
-	let puzzleURL = $state('');
-	let downloadCount = $state(data.counter || 0); // Track number of downloads
-	let urlInfo = $derived(validateURL(puzzleURL));
-	let urlSite = $derived(urlInfo?.hostname);
-	let urlValid = $derived(urlInfo?.valid);
-	let urlMessage = $derived(urlInfo?.message);
-	let loading = $state(false);
+	const onSubmit = (event: Event) => {
+		event.preventDefault();
+		downloadPuzzle();
+	};
 </script>
 
-<Card.Root>
-	<Card.Header>
-		<Card.Title>Download any puzzle into a .ipuz file format</Card.Title>
-		<Card.Description>Simply paste the URL below • {downloadCount} puzzles downloaded so far</Card.Description>
-	</Card.Header>
-	<Card.Content>
-		<Alert.Root class="mb-4">
-			<Alert.Title>
-				<p>{urlMessage}</p>
-				{#if urlSite === "observer.co.uk"}
-					<p class="text-sm mt-1 text-muted-foreground">
-						🚧 Note: Only the Everyman and Speedy puzzles are currently supported.
-					</p>
-				{/if}
-			</Alert.Title>
-		</Alert.Root>
-		<form>
-			<Input
-				placeholder="Puzzle URL"
-				bind:value={puzzleURL}
-				class={urlValid || puzzleURL === '' ? 'bg-white' : 'bg-destructive bg-opacity-20'}
-			/>
-		</form>
-	</Card.Content>
-	<Card.Footer class="flex flex-col items-start border-t px-6 py-4">
-		<Button disabled={!urlValid || loading} onclick={downloadPuzzle}>
-			{#if loading}
-				<LoaderCircle class="mr-2 h-4 w-4 animate-spin" />
-				Downloading...
-			{:else}
-				Download
-			{/if}
-		</Button>
+<section class="mx-auto w-full max-w-xl">
+	<p class="brand rise text-5xl font-semibold leading-[1.05] tracking-tight text-ink sm:text-6xl">
+		PuzzlePull
+	</p>
+	<p class="rise rise-delay-1 mt-4 max-w-md text-lg text-ink-soft">
+		Paste a crossword URL. Get an <span class="text-ink">.ipuz</span> file back.
+	</p>
 
-	</Card.Footer>
-</Card.Root>
+	<form class="rise rise-delay-2 mt-10 space-y-4" onsubmit={onSubmit}>
+		<label class="block">
+			<span class="mb-2 block text-sm font-medium text-ink-soft">Puzzle URL</span>
+			<input
+				class="field {puzzleURL !== '' && !urlValid ? 'is-invalid' : ''}"
+				type="url"
+				name="puzzleURL"
+				placeholder="https://www.theguardian.com/crosswords/…"
+				autocomplete="off"
+				spellcheck="false"
+				bind:value={puzzleURL}
+			/>
+		</label>
+
+		<div
+			class="min-h-[1.5rem] text-sm {urlValid
+				? 'status-ok'
+				: puzzleURL === ''
+					? 'status-muted'
+					: 'status-bad'}"
+			role="status"
+			aria-live="polite"
+		>
+			{urlMessage}
+			{#if urlSite === 'observer.co.uk'}
+				<span class="mt-1 block text-ink-soft">
+					Only Everyman and Speedy puzzles are supported.
+				</span>
+			{/if}
+			{#if errorMessage}
+				<span class="mt-1 block status-bad">{errorMessage}</span>
+			{/if}
+		</div>
+
+		<div class="flex flex-wrap items-center gap-4 pt-1">
+			<button class="btn-primary" type="submit" disabled={!urlValid || loading}>
+				{#if loading}
+					<svg class="spin size-4" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+						<circle cx="12" cy="12" r="9" stroke="currentColor" stroke-opacity="0.25" stroke-width="3" />
+						<path
+							d="M21 12a9 9 0 0 0-9-9"
+							stroke="currentColor"
+							stroke-width="3"
+							stroke-linecap="round"
+						/>
+					</svg>
+					Downloading…
+				{:else}
+					Download .ipuz
+				{/if}
+			</button>
+			<p class="text-sm text-ink-soft">
+				{downloadCount}
+				{downloadCount === 1 ? 'puzzle' : 'puzzles'} pulled so far
+			</p>
+		</div>
+	</form>
+</section>

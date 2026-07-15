@@ -1,112 +1,41 @@
 <script lang="ts">
-	import { Button } from '$lib/components/ui/button/index.js';
-	import * as Card from '$lib/components/ui/card/index.js';
-	import { Input } from '$lib/components/ui/input/index.js';
-	import * as Alert from '$lib/components/ui/alert/index.js';
-
 	import { validHostnames } from '$lib/validHostnames.json';
 
-	const hostnameList = Object.keys(validHostnames);
-
-	// validate the URL
-	let validateURL = (puzzleURL: string) => {
-		// catch empty string
-		if (puzzleURL === '') {
-			return {
-				valid: false,
-				hostname: '',
-				message: 'Please enter a URL'
-			};
-		}
-
-		try {
-			new URL(puzzleURL);
-
-			let hostname = getURLsite(puzzleURL);
-
-			if (hostnameList.includes(hostname)) {
-				return {
-					valid: true,
-					hostname: hostname,
-					message: `Site: ${validHostnames[hostname]}`
-				};
-			} else {
-				return {
-					valid: false,
-					hostname: hostname,
-					message: 'Site not supported'
-				};
-			}
-		} catch (e) {
-			return {
-				valid: false,
-				hostname: '',
-				message: 'Invalid URL'
-			};
-		}
+	const notes: Record<string, string> = {
+		'observer.co.uk': 'Everyman & Speedy only'
 	};
 
-	let getURLsite = (puzzleURL: string) => {
-		try {
-			let url = new URL(puzzleURL);
-			return url.hostname;
-		} catch (e) {
-			return '';
-		}
-	};
-
-	let downloadPuzzle = async () => {
-		console.log('Downloading puzzle', puzzleURL);
-		// fetch the puzzle
-		const response = await fetch('/getPuzzle', {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json'
-			},
-			body: JSON.stringify({ url: puzzleURL })
-		});
-
-		if (response.ok) {
-			const clonedResponse = response.clone();
-			const data = await response.blob();
-			const jsonInfo = await clonedResponse.json();
-			// download the puzzle as a file
-			const url = URL.createObjectURL(data);
-			const a = document.createElement('a');
-			a.href = url;
-			a.download = jsonInfo?.annotation ? `${jsonInfo.annotation}` : 'puzzle.ipuz';
-			document.body.appendChild(a);
-			a.click();
-			URL.revokeObjectURL(url);
-		} else {
-			console.error(response);
-		}
-	};
-
-	let puzzleURL = $state('');
-	let urlInfo = $derived(validateURL(puzzleURL));
-	let urlSite = $derived(urlInfo?.hostname);
-	let urlValid = $derived(urlInfo?.valid);
-	let urlMessage = $derived(urlInfo?.message);
+	const sites = Object.entries(validHostnames).filter(([host]) => host !== 'localhost');
 </script>
 
-<Card.Root>
-	<Card.Header>
-		<Card.Title>Compatibility List</Card.Title>
-		<Card.Description>
-			If the site you want is not listed, open an issue on GitHub!
-		</Card.Description>
-	</Card.Header>
-	<Card.Content>
-		<ul>
-			<li>- The Guardian</li>
-			<li>- The Observer (Everyman & Speedy only)</li>
-		</ul>
-	</Card.Content>
-	<Card.Footer class="border-t px-6 py-4">
-		<Button
-			on:click={() => (window.location.href = 'https://github.com/astrojarred/puzzlepull/issues')}
-			>Request</Button
+<section class="mx-auto w-full max-w-xl">
+	<p class="brand rise text-4xl font-semibold tracking-tight text-ink sm:text-5xl">Sites</p>
+	<p class="rise rise-delay-1 mt-4 max-w-md text-lg text-ink-soft">
+		These hosts work today. Need another? Open a GitHub issue.
+	</p>
+
+	<ul class="rise rise-delay-2 mt-10 divide-y divide-line/70 border-y border-line/70">
+		{#each sites as [hostname, label]}
+			<li class="flex flex-col gap-1 py-4 sm:flex-row sm:items-baseline sm:justify-between">
+				<div>
+					<span class="font-medium text-ink">{label}</span>
+					{#if notes[hostname]}
+						<span class="mt-1 block text-sm text-ink-soft">{notes[hostname]}</span>
+					{/if}
+				</div>
+				<span class="font-mono text-sm text-ink-soft">{hostname}</span>
+			</li>
+		{/each}
+	</ul>
+
+	<div class="rise rise-delay-3 mt-8">
+		<a
+			class="btn-primary"
+			href="https://github.com/astrojarred/puzzlepull/issues"
+			target="_blank"
+			rel="noopener noreferrer"
 		>
-	</Card.Footer>
-</Card.Root>
+			Request a site
+		</a>
+	</div>
+</section>

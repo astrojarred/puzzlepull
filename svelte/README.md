@@ -1,2 +1,5 @@
 # PuzzlePull frontend
-This is the frontend for the puzzlepull repository written with svelte 5 and sveltekit.
+
+Svelte 5 + SvelteKit UI for converting crossword puzzle pages to `.ipuz`.
+
+Design direction: **Grid Ink** (see `/DESIGN_PROPOSALS.md` at repo root).
