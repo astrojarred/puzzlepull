@@ -45,7 +45,7 @@
 			return {
 				valid: false,
 				hostname,
-				message: 'Site not supported yet'
+				message: 'Site not supported yet — check Compatible sites'
 			};
 		} catch {
 			return {
@@ -57,7 +57,7 @@
 	};
 
 	let puzzleURL = $state('');
-	// Seed once from layout load; later updates come from /counter after download
+	// Seed once from layout load (Redis counter); refresh after each download
 	let downloadCount = $state(untrack(() => Number(data.counter) || 0));
 	let loading = $state(false);
 	let errorMessage = $state('');
@@ -102,7 +102,7 @@
 			const counterResponse = await fetch('/counter');
 			if (counterResponse.ok) {
 				const counterData = await counterResponse.json();
-				downloadCount = counterData.counter;
+				downloadCount = Number(counterData.counter) || downloadCount;
 			}
 		} catch {
 			errorMessage = 'Something went wrong. Please try again.';
@@ -117,17 +117,27 @@
 	};
 </script>
 
-<section class="mx-auto w-full max-w-xl">
-	<p class="brand rise text-5xl font-semibold leading-[1.05] tracking-tight text-ink sm:text-6xl">
+<section class="relative mx-auto w-full max-w-xl">
+	<div
+		class="empty-cell pointer-events-none absolute -right-6 top-8 hidden size-36 sm:block md:-right-10 md:size-44"
+		aria-hidden="true"
+	></div>
+
+	<p class="brand rise text-[clamp(2.5rem,10vw,4.25rem)] font-extrabold leading-[0.95] text-ink">
 		PuzzlePull
 	</p>
-	<p class="rise rise-delay-1 mt-4 max-w-md text-lg text-ink-soft">
+	<p class="rise rise-delay-1 mt-4 max-w-md text-base text-ink-soft sm:text-lg">
 		Paste a crossword URL. Get an <span class="text-ink">.ipuz</span> file back.
 	</p>
 
-	<form class="rise rise-delay-2 mt-10 space-y-4" onsubmit={onSubmit}>
+	<p class="mono-meta rise rise-delay-1 mt-5 text-ink-soft">
+		{downloadCount.toLocaleString()}
+		{downloadCount === 1 ? 'puzzle' : 'puzzles'} downloaded
+	</p>
+
+	<form class="rise rise-delay-2 relative mt-8 space-y-4 sm:mt-10" onsubmit={onSubmit}>
 		<label class="block">
-			<span class="mb-2 block text-sm font-medium text-ink-soft">Puzzle URL</span>
+			<span class="mb-2 block text-sm font-semibold text-ink">Puzzle URL</span>
 			<input
 				class="field {puzzleURL !== '' && !urlValid ? 'is-invalid' : ''}"
 				type="url"
@@ -140,7 +150,7 @@
 		</label>
 
 		<div
-			class="min-h-[1.5rem] text-sm {urlValid
+			class="mono-meta min-h-[1.5rem] {urlValid
 				? 'status-ok'
 				: puzzleURL === ''
 					? 'status-muted'
@@ -150,7 +160,7 @@
 		>
 			{urlMessage}
 			{#if urlSite === 'observer.co.uk'}
-				<span class="mt-1 block text-ink-soft">
+				<span class="mt-1 block status-muted">
 					Only Everyman and Speedy puzzles are supported.
 				</span>
 			{/if}
@@ -159,27 +169,39 @@
 			{/if}
 		</div>
 
-		<div class="flex flex-wrap items-center gap-4 pt-1">
-			<button class="btn-primary" type="submit" disabled={!urlValid || loading}>
+		<div class="flex flex-col gap-3 pt-1 sm:flex-row sm:flex-wrap sm:items-center">
+			<button
+				class="btn-primary w-full sm:w-auto {loading ? 'is-loading' : ''}"
+				type="submit"
+				disabled={!urlValid || loading}
+			>
 				{#if loading}
-					<svg class="spin size-4" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-						<circle cx="12" cy="12" r="9" stroke="currentColor" stroke-opacity="0.25" stroke-width="3" />
-						<path
-							d="M21 12a9 9 0 0 0-9-9"
-							stroke="currentColor"
-							stroke-width="3"
-							stroke-linecap="round"
-						/>
-					</svg>
-					Downloading…
+					<span class="relative z-10 inline-flex items-center gap-2">
+						<svg class="spin size-4" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+							<circle
+								cx="12"
+								cy="12"
+								r="9"
+								stroke="currentColor"
+								stroke-opacity="0.25"
+								stroke-width="3"
+							/>
+							<path
+								d="M21 12a9 9 0 0 0-9-9"
+								stroke="currentColor"
+								stroke-width="3"
+								stroke-linecap="round"
+							/>
+						</svg>
+						Downloading…
+					</span>
 				{:else}
 					Download .ipuz
 				{/if}
 			</button>
-			<p class="text-sm text-ink-soft">
-				{downloadCount}
-				{downloadCount === 1 ? 'puzzle' : 'puzzles'} pulled so far
-			</p>
+			<a class="link-quiet text-center text-sm text-ink-soft sm:text-left" href="/compatibility"
+				>See compatible sites</a
+			>
 		</div>
 	</form>
 </section>

@@ -7,25 +7,24 @@ const config: Config = {
 		extend: {
 			colors: {
 				ink: {
-					DEFAULT: '#1b2a41',
-					soft: '#3a4a63'
+					DEFAULT: '#121212',
+					soft: '#5c5c5c'
 				},
 				paper: {
-					DEFAULT: '#f4f6f8',
-					deep: '#e8edf2'
+					DEFAULT: '#fafaf8',
+					deep: '#f3f3ef'
 				},
-				line: '#c5ced9',
-				cobalt: {
-					DEFAULT: '#2f6fed',
-					deep: '#1f54c4'
-				}
+				line: '#d6d6d0',
+				signal: {
+					DEFAULT: '#e23d28',
+					deep: '#c43220'
+				},
+				cell: '#ecece6'
 			},
 			fontFamily: {
-				sans: ['DM Sans', ...fontFamily.sans],
-				display: ['Fraunces', 'Georgia', 'serif']
-			},
-			borderRadius: {
-				xl: '0.75rem'
+				sans: ['Source Sans 3', ...fontFamily.sans],
+				display: ['Syne', 'system-ui', 'sans-serif'],
+				mono: ['IBM Plex Mono', ...fontFamily.mono]
 			}
 		}
 	}
